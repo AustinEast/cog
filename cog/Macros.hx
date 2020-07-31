@@ -8,6 +8,20 @@ import haxe.macro.Type;
 using haxe.macro.Tools;
 
 class Macros {
+
+  static var dataFields:Map<String, String> = [];
+
+  /**
+   * Build Macro to add extra fields to the Components class.
+   *
+   * Example: in build.hxml - `--macro echo.Macros.add_data("entity", "some.package.Entity")
+   * @param name
+   * @param type
+   */
+   public static function add_data(name:String, type:String) {
+    dataFields[name] = type;
+  }
+
   static function type_exists(typeName:String):Bool {
     try {
       if (Context.getType(typeName) != null) return true;
@@ -106,6 +120,20 @@ class Macros {
       default:
         throw false;
     }
+  }
+
+  static function build_components() {
+    if (Lambda.count(dataFields) == 0) return null;
+    var fields = Context.getBuildFields();
+    for (kv in dataFields.keyValueIterator()) {
+      fields.push({
+        name: kv.key,
+        access: [Access.APublic],
+        kind: FieldType.FVar(Context.toComplexType(Context.getType(kv.value))),
+        pos: Context.currentPos()
+      });
+    }
+    return fields;
   }
 
   static function build_node_class(params:Array<Type>):ComplexType {

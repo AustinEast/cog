@@ -59,6 +59,11 @@ class Entity {
   public function new() {
     components = new Components();
 
+    // Assign the Entity field on the Components instance
+    // This is only available by using the integration build macro, detailed here: https://github.com/AustinEast/cog#integration
+    components.entity = this;
+
+
     // Create and add the Position Component to the Entity
     position = new Position();
     components.add(position);

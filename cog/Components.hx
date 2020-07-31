@@ -2,6 +2,7 @@ package cog;
 
 import cog.Component;
 
+@:build(cog.Macros.build_components())
 class Components {
   static var ids:Int = 0;
   /**

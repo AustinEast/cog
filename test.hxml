@@ -4,6 +4,8 @@
 -main Main
 # libraries
 -lib cog
+# integrate the Entity class into the Component class
+--macro cog.Macros.add_data("entity", "Main.Entity")
 # output
 -hl bin/test.hl
 # -cmd hl bin/test.hl
