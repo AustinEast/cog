@@ -1,0 +1,11 @@
+{
+    "name": "cog",
+    "license": "MIT",
+    "tags": ["ecs", "framework"],
+    "description": "A Macro Powered B.Y.O.E. (Bring Your Own Entity!) ECS Framework",
+    "contributors": ["austineast"],
+    "url": "https://github.com/AustinEast/cog",
+    "releasenote": "initial release",
+    "version": "0.0.1",
+    "dependencies": {}
+  }

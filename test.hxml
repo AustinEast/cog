@@ -1,0 +1,9 @@
+# class paths
+-cp test
+# entry point
+-main Main
+# libraries
+-lib cog
+# output
+-hl bin/test.hl
+# -cmd hl bin/test.hl
