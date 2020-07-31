@@ -42,7 +42,7 @@ components.entity = new some.package.Entity();
 
 ## Example
 
-```
+```haxe
 import cog.Components;
 import cog.System;
 import cog.Component;
