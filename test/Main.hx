@@ -49,8 +49,10 @@ class MovementSystem extends System {
   // This method is called every time the Cog Engine is stepped forward by the Game Loop
   override public function step(dt:Float) {
     for (node in nodes) {
-      node.position.x += node.velocity.x;
-      node.position.y += node.velocity.y;
+      // Increment each Node's Position by it's Velocity
+      // Each Node holds reference to the `Components` object, along with a reference to each Component defined by the Nodes list
+      node.position.x += node.velocity.x * dt;
+      node.position.y += node.velocity.y * dt;
     }
   }
 }
@@ -95,7 +97,7 @@ class Main {
 
       // Log the Entities' Positions
       for (entity in entities) {
-        trace('${entity.name} is a position (${entity.position.x}, ${entity.position.y})');
+        trace('${entity.name} is at position (${entity.position.x}, ${entity.position.y})');
       }
       trace('---------- End Frame ------------');
     }
