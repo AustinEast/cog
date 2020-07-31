@@ -6,6 +6,6 @@
     "contributors": ["austineast"],
     "url": "https://github.com/AustinEast/cog",
     "releasenote": "initial release",
-    "version": "0.0.1",
+    "version": "1.0.0",
     "dependencies": {}
   }
