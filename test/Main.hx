@@ -1,15 +1,16 @@
 import cog.Components;
 import cog.System;
-import cog.Component;
 import cog.Engine;
 import cog.Node;
 import component.Position;
+import component.Velocity;
 
 // Plug the `Components` class into your own `Entity` class!
 class Entity {
   public var components:Components;
   public var name:String = '';
   public var position:Position;
+  public var velocity:Velocity;
 
   public function new() {
     components = new Components();
@@ -18,20 +19,38 @@ class Entity {
     // This is only available by using the integration build macro, detailed here: https://github.com/AustinEast/cog#integration
     components.entity = this;
 
-    // Create and add the Position Component to the Entity
+    // Create and add the Position & Velocity Components to the Entity
     position = new Position();
+    velocity = new Velocity();
     components.add(position);
+    components.add(velocity);
   }
 }
 
 // Create a Basic System
 class MovementSystem extends System {
-  @:nodes var nodes:Node<Position>;
 
+  // Using the `@:nodes` metadata, create a collection of Nodes.
+  // The Nodes class automatically tracks any `Components` object that has the Position and Velocity components,
+  // and will create a `Node` object for each one
+  @:nodes var nodes:Node<Position,Velocity>;
+
+  // This method is called when a System is added to the Cog Engine
+  override function added(engine:Engine) {
+    super.added(engine);
+
+    // Subscribe to the Node list's `added` event to set a random velocity to each Node as it gets added to the System
+    nodes.added.add(node -> {
+      node.velocity.x = Math.random() * 10;
+      node.velocity.y = Math.random() * 10;
+    });
+  }
+
+  // This method is called every time the Cog Engine is stepped forward by the Game Loop
   override public function step(dt:Float) {
     for (node in nodes) {
-      node.position.x += 10 * dt;
-      node.position.y += 10 * dt;
+      node.position.x += node.velocity.x;
+      node.position.y += node.velocity.y;
     }
   }
 }
@@ -40,6 +59,7 @@ class Main {
   static function main() {
     // Create an Array to hold the Entities
     var entities = [];
+
     // Create the Cog Engine
     var engine = new Engine();
 
@@ -49,7 +69,7 @@ class Main {
       engine.remove_components(entity.components);
     }
 
-    // Define a method to add Entities from the Game
+    // Define a method to add Entities to the Game
     inline function add_entity(entity:Entity) {
       remove_entity(entity);
       entities.push(entity);
@@ -73,11 +93,10 @@ class Main {
       // Update the Cog Engine
       engine.step(16 / 1000);
 
-      // Log our Entities Positions
+      // Log the Entities' Positions
       for (entity in entities) {
         trace('${entity.name} is a position (${entity.position.x}, ${entity.position.y})');
       }
-
       trace('---------- End Frame ------------');
     }
   }
