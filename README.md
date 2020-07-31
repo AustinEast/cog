@@ -1,3 +1,7 @@
+<p align="center">
+  <img src="https://raw.githubusercontent.com/AustinEast/cog/master/assets/logo.png">
+</p>
+
 # cog
 A Macro powered B.Y.O.E. (Bring Your Own Entity!) ECS Framework written in Haxe.
 
@@ -5,25 +9,70 @@ A Macro powered B.Y.O.E. (Bring Your Own Entity!) ECS Framework written in Haxe.
 
 ECS concepts & implementation inspired by [exp-ecs](https://github.com/kevinresol/exp-ecs).
 
+## Why?
+
+As a big fan of the Macro approach and concepts in [exp-ecs](https://github.com/kevinresol/exp-ecs), I originally wrote `cog` as a piece of the [ghost framework](https://github.com/AustinEast/ghost) to provide that same kind of workflow. But as that project evolved and changed it's focus to 2D only, I found I wanted to be able to plug it's dead simple ECS implementation into _any_ kind of project, with no extra dependencies required. So I ripped the ECS out of the ghost framework, and `cog` was born!
+
 <!-- ## Features -->
 
-<!-- ## Getting Started -->
+## Getting Started
+
+Cog requires [Haxe 4](https://haxe.org/download/) to run.
+
+Install the library from haxelib:
+```
+haxelib install cog
+```
+Alternatively the dev version of the library can be installed from github:
+```
+haxelib git cog https://github.com/AustinEast/cog.git
+```
+
+Then include the library in your project's `.hxml`:
+```hxml
+-lib cog
+```
+For OpenFL users, add this into your `Project.xml`:
+
+```xml
+<haxelib name="cog" />
+```
+
+For Kha users (who don't use haxelib), clone cog to the `Libraries` folder in your project root, and then add the following to your `khafile.js`:
+
+```js
+project.addLibrary('cog');
+```
+
 
 ## Usage
 
-<!-- ### Concepts
+### Concepts
 
 #### Engine
 
+The `Engine` is the entry point for Cog - it's main purpose is keeping track of `Components` and updating each `System`.
+
 #### Component
+
+A `Component` is an object that holds data that define an entity. Generally a component only holds variables, with little-to-no logic.
 
 #### Components
 
+A `Components` object is a container that holds `Component` instances. 
+This class is meant to be integrated into your own project's base object class (ie Entity, GameObject, Sprite, etc). 
+
 #### System
+
+A `System` tracks collections of `Components` as `Nodes` for the purpose of performing logic on them. 
 
 #### Node
 
-#### Nodes -->
+A `Node` object keeps reference to a `Components` object and its relevant `Component` instances.
+
+#### Nodes
+
+A `Nodes` object tracks all the `Components` objects in the `Engine`, creating a `Node` for every `Components` object that contains all of it's required `Component` instances. `Nodes` objects are used by `System` objects to perform logic on `Components`.
 
 ### Integration
 
@@ -76,7 +125,7 @@ class Entity {
 class MovementSystem extends System {
 
   // Using the `@:nodes` metadata, create a collection of Nodes.
-  // The Nodes class automatically tracks any `Components` object that has the Position and Velocity components,
+  // The `Nodes` class automatically tracks any `Components` object that has the Position and Velocity components,
   // and will create a `Node` object for each one
   @:nodes var nodes:Node<Position,Velocity>;
 
@@ -94,8 +143,10 @@ class MovementSystem extends System {
   // This method is called every time the Cog Engine is stepped forward by the Game Loop
   override public function step(dt:Float) {
     for (node in nodes) {
-      node.position.x += node.velocity.x;
-      node.position.y += node.velocity.y;
+      // Increment each Node's Position by it's Velocity
+      // Each Node holds reference to the `Components` object, along with a reference to each Component defined by the Nodes list
+      node.position.x += node.velocity.x * dt;
+      node.position.y += node.velocity.y * dt;
     }
   }
 }
@@ -140,11 +191,10 @@ class Main {
 
       // Log the Entities' Positions
       for (entity in entities) {
-        trace('${entity.name} is a position (${entity.position.x}, ${entity.position.y})');
+        trace('${entity.name} is at position (${entity.position.x}, ${entity.position.y})');
       }
       trace('---------- End Frame ------------');
     }
   }
 }
-
 ```
