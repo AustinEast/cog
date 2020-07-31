@@ -5,13 +5,13 @@ A Macro powered B.Y.O.E. (Bring Your Own Entity!) ECS Framework written in Haxe.
 
 ECS concepts & implementation inspired by [exp-ecs](https://github.com/kevinresol/exp-ecs).
 
-<!-- ## Features
+<!-- ## Features -->
 
-## Getting Started
+<!-- ## Getting Started -->
 
 ## Usage
 
-### Concepts
+<!-- ### Concepts
 
 #### Engine
 
@@ -23,9 +23,22 @@ ECS concepts & implementation inspired by [exp-ecs](https://github.com/kevinreso
 
 #### Node
 
-#### Nodes
+#### Nodes -->
 
-### Integration -->
+### Integration
+
+A build macro is available to add custom fields to the `Components` class, such as an `Entity` class:
+
+in build.hxml:
+```hxml
+--macro cog.Macros.add_data("entity", "some.package.Entity")
+```
+
+in Main.hx
+```haxe
+var components = new cog.Components();
+components.entity = new some.package.Entity();
+```
 
 ## Example
 
