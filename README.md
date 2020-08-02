@@ -64,7 +64,7 @@ This class is meant to be integrated into your own project's base object class (
 
 #### System
 
-A `System` tracks collections of `Components` as `Nodes` for the purpose of performing logic on them. 
+A `System` tracks collections of `Components` (as `Nodes`) for the purpose of performing logic on them. 
 
 #### Node
 
