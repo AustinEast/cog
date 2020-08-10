@@ -1,11 +1,16 @@
 {
-    "name": "cog",
-    "license": "MIT",
-    "tags": ["ecs", "framework"],
-    "description": "A Macro Powered B.Y.O.E. (Bring Your Own Entity!) ECS Framework",
-    "contributors": ["austineast"],
-    "url": "https://github.com/AustinEast/cog",
-    "releasenote": "initial release",
-    "version": "1.0.0",
-    "dependencies": {}
-  }
+  "name": "cog",
+  "license": "MIT",
+  "tags": [
+    "ecs",
+    "framework"
+  ],
+  "description": "A Macro Powered B.Y.O.E. (Bring Your Own Entity!) ECS Framework",
+  "contributors": [
+    "austineast"
+  ],
+  "url": "https://github.com/AustinEast/cog",
+  "releasenote": "add custom data macro to `Node`s",
+  "version": "1.1.0",
+  "dependencies": {}
+}
