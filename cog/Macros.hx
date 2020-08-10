@@ -8,9 +8,7 @@ import haxe.macro.Type;
 using haxe.macro.Tools;
 
 class Macros {
-
   static var dataFields:Map<String, String> = [];
-
   /**
    * Build Macro to add extra fields to the Components class.
    *
@@ -18,7 +16,7 @@ class Macros {
    * @param name
    * @param type
    */
-   public static function add_data(name:String, type:String) {
+  public static function add_data(name:String, type:String) {
     dataFields[name] = type;
   }
 
@@ -125,12 +123,13 @@ class Macros {
   static function build_components() {
     if (Lambda.count(dataFields) == 0) return null;
     var fields = Context.getBuildFields();
+    var pos = Context.currentPos();
     for (kv in dataFields.keyValueIterator()) {
       fields.push({
         name: kv.key,
         access: [Access.APublic],
         kind: FieldType.FVar(Context.toComplexType(Context.getType(kv.value))),
-        pos: Context.currentPos()
+        pos: pos
       });
     }
     return fields;
@@ -152,6 +151,34 @@ class Macros {
         this.components = components;
         name = $v{name};
       });
+
+      // Loop through any custom data fields and add a getter for it
+      if (Lambda.count(dataFields) > 0) {
+        for (kv in dataFields.keyValueIterator()) {
+          var dataField = kv.key;
+          var dataType = Context.toComplexType(Context.getType(kv.value));
+
+          // Add the property field
+          fields.push({
+            name: dataField,
+            access: [Access.APublic],
+            kind: FProp("get", "null", dataType),
+            pos: pos
+          });
+
+          // Add the getter
+          fields.push({
+            name: "get_" + dataField,
+            access: [Access.APrivate, Access.AInline],
+            kind: FFun({
+              expr: macro return components.$dataField,
+              ret: dataType,
+              args: []
+            }),
+            pos: pos,
+          });
+        }
+      }
 
       // Loop through the params and add them to the Node's fields
       for (param in params) {
