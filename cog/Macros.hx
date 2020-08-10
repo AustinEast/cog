@@ -12,7 +12,7 @@ class Macros {
   /**
    * Build Macro to add extra fields to the Components class.
    *
-   * Example: in build.hxml - `--macro echo.Macros.add_data("entity", "some.package.Entity")
+   * Example: in build.hxml - `--macro cog.Macros.add_data("entity", "some.package.Entity")
    * @param name
    * @param type
    */
