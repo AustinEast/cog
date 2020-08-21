@@ -1,6 +1,7 @@
 package cog;
 
 class Engine {
+  public var active:Bool = true;
   public var systems:Array<System> = [];
   public var components:Array<Components> = [];
   public var components_added:Signal<Components> = new Signal<Components>();
@@ -9,7 +10,7 @@ class Engine {
   public function new() {}
 
   public function step(dt:Float) {
-    for (system in systems) system.step(dt);
+    if (active) for (system in systems) system.step(dt);
   }
 
   public function add_system(system:System) {
