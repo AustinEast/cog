@@ -209,6 +209,7 @@ class Macros {
         // var componentPath = '${paramClass.pack.join('.')}.${paramClass.name}'.split('.').filter(str -> str.length > 0);
 
         // Add an expression to get the component in the Node's constructor
+        // TODO - fix naming conflict with having Component classes in `components` module
         constructorExprs.push(macro this.$paramName = components.get($p{componentPath}));
         // Add an expression for the `component_types` variable
         componentTypes.push(macro $p{componentPath});
