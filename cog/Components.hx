@@ -64,7 +64,7 @@ class Components {
 
   public function dispose() {
     active = false;
-    for (member in members) member.dispose();
+    if (members != null) for (member in members) member.dispose();
     members = null;
   }
 
