@@ -2,26 +2,28 @@ package cog;
 
 class Engine {
   public var active:Bool = true;
-  public var systems:Array<System> = [];
+  public var systems:Map<Int, Array<System>> = [];
   public var components:Array<Components> = [];
   public var components_added:Signal<Components> = new Signal<Components>();
   public var components_removed:Signal<Components> = new Signal<Components>();
 
   public function new() {}
 
-  public function step(dt:Float) {
-    if (active) for (system in systems) system.step(dt);
+  public function step(dt:Float, group:Int = 0) {
+    if (active && systems.exists(group)) for (system in systems[group]) system.try_step(dt);
   }
 
-  public function add_system(system:System) {
-    if (!systems.contains(system)) {
-      systems.push(system);
+  public function add_system(system:System, group:Int = 0) {
+    if (systems[group] == null) systems[group] = [];
+    if (!systems[group].contains(system)) {
+      systems[group].push(system);
       system.added(this);
     }
   }
 
-  public function remove_system(system:System) {
-    if (systems.remove(system)) {
+  public function remove_system(system:System, group:Int = 0) {
+    if (systems[group] == null) return;
+    if (systems[group].remove(system)) {
       system.removed();
     }
   }
