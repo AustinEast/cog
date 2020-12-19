@@ -15,7 +15,11 @@ class Engine {
   public function step(dt:Float, group:Int = 0) {
     if (active && systems.exists(group)) for (system in systems[group]) system.try_step(dt);
   }
-
+  /**
+   * Adds the `system` to the Engine.
+   * @param system
+   * @param group
+   */
   public function add_system(system:System, group:Int = 0) {
     if (systems[group] == null) systems[group] = [];
     if (!systems[group].contains(system)) {
@@ -23,10 +27,25 @@ class Engine {
       system.added(this);
     }
   }
+  /**
+   * Attempts to remove the `system` from the Engine. If `group` is set to `-1`, the system will be removed from every group.
+   * @param system
+   * @param group
+   */
+  public function remove_system(system:System, group:Int = -1) {
+    if (group < 0) for (s in systems) {
+      if (s.remove(system)) {
+        @:privateAccess
+        system.engine = null;
+        system.removed();
+      }
+      return;
+    }
 
-  public function remove_system(system:System, group:Int = 0) {
     if (systems[group] == null) return;
     if (systems[group].remove(system)) {
+      @:privateAccess
+      system.engine = null;
       system.removed();
     }
   }

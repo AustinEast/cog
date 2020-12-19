@@ -56,13 +56,13 @@ class Macros {
               name: ct.name,
               pack: ct.pack
             }
-            var fullNodeName = '${ct.pack.join('.')}.${ct.name}'.split('.');
+            var fullNodeName = ct.pack.concat([ct.name]);
             // Make the expression to create the `Nodes` when the system is added
             addNodesExpr.push(macro $i{fieldName} = new cog.Nodes(engine, components -> new $typePath(components),
               (components) -> components.has_all($p{fullNodeName}.component_types)));
             // Make the expressions to destroy the `Nodes` when the system is removed
             removeNodesExpr.push(macro {
-              $i{fieldName}.dispose();
+              if ($i{fieldName} != null) $i{fieldName}.dispose();
               $i{fieldName} = null;
             });
           default:
@@ -135,6 +135,56 @@ class Macros {
     return fields;
   }
 
+  static function build_component() {
+    // Check if this Class has already added the required `IComponent` fields in one of it's parent Classes. Exit early if so.
+    var sc = Context.getLocalClass().get().superClass;
+    while (sc != null) {
+      var sct = sc.t.get();
+      for (i in sct.interfaces) {
+        if (i.t.get().name == 'IComponent') return null;
+      }
+      sc = sct.superClass;
+    }
+
+    // Otherwise add the required fields
+    var fields = Context.getBuildFields();
+    var concat = (macro class {
+      /**
+       * The Component's Class name, represented as either a String or as a Type.
+       *
+       * Example:
+       * ```haxe
+       * var myComponent = new MyComponent();
+       * trace(myComponent.component_type == MyComponent); // true
+       * trace(myComponent.component_type == "MyComponent"); // also true
+       * ```
+       */
+      public var component_type(get, never):ComponentType;
+      /**
+       * The `Components` object that currently owns this Component.
+       */
+      public var owner(default, null):cog.Components = null;
+      /**
+       * Optional callback method that gets called when this Component is added to a `Components` object.
+       */
+      public var owner_added:cog.Components->Void = null;
+      /**
+       * Optional callback method that gets called when this Component is removed from a `Components` object.
+       */
+      public var owner_removed:Void->Void = null;
+      /**
+       * Removes this Component's owner object, if it has one.
+       */
+      public function remove_owner() {
+        if (owner != null) owner.remove(component_type);
+      }
+
+      inline function get_component_type():ComponentType return this;
+    }).fields;
+
+    return fields.concat(concat);
+  }
+
   static function build_node_class(params:Array<Type>):ComplexType {
     var paramNames = [for (param in params) param.getClass().name.split('.').pop()].join("");
     var name = 'Node$paramNames';
@@ -143,12 +193,11 @@ class Macros {
       var fields:Array<Field> = [];
       var constructorExprs:Array<Expr> = [];
       var regex = ~/(?<!^)([A-Z])/g;
-      var componentClass = Context.getType('cog.Component').getClass();
       var componentTypes:Array<Expr> = [];
 
       // Add an Expr to get the 'components' to the constructor
       constructorExprs.push(macro {
-        this.components = components;
+        this.owner = owner;
         name = $v{name};
       });
 
@@ -171,7 +220,7 @@ class Macros {
             name: "get_" + dataField,
             access: [Access.APrivate, Access.AInline],
             kind: FFun({
-              expr: macro return components.$dataField,
+              expr: macro return owner.$dataField,
               ret: dataType,
               args: []
             }),
@@ -182,9 +231,12 @@ class Macros {
 
       // Loop through the params and add them to the Node's fields
       for (param in params) {
-        // Check if param is a Component. throw an exception if not
         var paramClass = param.getClass();
-        if (!is_subclass(paramClass, componentClass)) throw('Class `${paramClass.name}` does not extend `cog.Component`.');
+
+        // TODO - update this to check for IComponent interface
+        // Check if param is a Component. throw an exception if not
+        // var componentClass = Context.getType('cog.IComponent').getClass();
+        // if (!is_subclass(paramClass, componentClass)) throw('Class `${paramClass.name}` does not extend `cog.Component`.');
 
         // Make the param name snake_case
         var paramName = '';
@@ -205,12 +257,10 @@ class Macros {
         });
 
         var componentPath = paramClass.pack.concat([paramClass.name]);
-
-        // var componentPath = '${paramClass.pack.join('.')}.${paramClass.name}'.split('.').filter(str -> str.length > 0);
+        if (componentPath.length <= 1) componentPath.insert(0, paramClass.module);
 
         // Add an expression to get the component in the Node's constructor
-        // TODO - fix naming conflict with having Component classes in `components` module
-        constructorExprs.push(macro this.$paramName = components.get($p{componentPath}));
+        constructorExprs.push(macro this.$paramName = owner.get($p{componentPath}));
         // Add an expression for the `component_types` variable
         componentTypes.push(macro $p{componentPath});
       }
@@ -218,9 +268,9 @@ class Macros {
       // Create a static field to contain Component references
       fields.push({
         name: 'component_types',
-        access: [AStatic, APublic],
+        access: [AStatic, APublic, AFinal],
         pos: pos,
-        kind: FVar(macro:Array<cog.Component.ComponentType>, macro $a{componentTypes})
+        kind: FVar(macro:Array<cog.IComponent.ComponentType>, macro $a{componentTypes})
       });
 
       // Create the Constructor
@@ -229,7 +279,7 @@ class Macros {
         access: [APublic],
         pos: pos,
         kind: FFun({
-          args: [{name: 'components', type: TPath({name: 'Components', pack: ['cog']})}],
+          args: [{name: 'owner', type: TPath({name: 'Components', pack: ['cog']})}],
           expr: macro $b{constructorExprs},
           ret: macro:Void
         })

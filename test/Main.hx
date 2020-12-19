@@ -1,16 +1,28 @@
+import cog.IComponent;
 import cog.Components;
 import cog.System;
 import cog.Engine;
 import cog.Node;
-import component.Position;
-import component.Velocity;
 
-// Plug the `Components` class into your own `Entity` class!
+// Creating Component classes is as simple as implementing the `IComponent` interface.
+// When the interface is implemented, the required Component fields are all added automatically.
+
+@:structInit
+class Position implements IComponent {
+  public var x:Float = 0;
+  public var y:Float = 0;
+}
+
+@:structInit
+class Velocity implements IComponent {
+  public var x:Float = 0;
+  public var y:Float = 0;
+}
+
+// Plug the `Components` class into your own `Entity` class
 class Entity {
   public var components:Components;
   public var name:String = '';
-  public var position:Position;
-  public var velocity:Velocity;
 
   public function new() {
     components = new Components();
@@ -19,9 +31,9 @@ class Entity {
     // This is only available by using the integration build macro, detailed here: https://github.com/AustinEast/cog#integration
     components.entity = this;
 
-    // Create and add the Position & Velocity Components to the Entity
-    position = new Position();
-    velocity = new Velocity();
+    // Create the Position & Velocity Components, then add them to the Entity's Components instance
+    var position:Position = {};
+    var velocity:Velocity = {};
     components.add(position);
     components.add(velocity);
   }
@@ -35,10 +47,11 @@ class MovementSystem extends System {
   @:nodes var nodes:Node<Position, Velocity>;
 
   // This method is called when a System is added to the Cog Engine
+  // Override this to apply any needed initialization logic to your Nodes
   override function added(engine:Engine) {
     super.added(engine);
 
-    // Set a random velocity on each Node
+    // Set a random velocity on each Node that already exists in the System
     for (node in nodes) {
       node.velocity.x = Math.random() * 200;
       node.velocity.y = Math.random() * 200;
@@ -49,6 +62,12 @@ class MovementSystem extends System {
       node.velocity.x = Math.random() * 200;
       node.velocity.y = Math.random() * 200;
     });
+  }
+
+  // This method is called when a System is removed from the Cog Engine
+  // Override this to apply any needed disposal logic to your Nodes
+  override function removed() {
+    super.removed();
   }
 
   // This method is called every time the Cog Engine is stepped forward by the Game Loop
@@ -105,11 +124,14 @@ class Main {
     }
 
     // Add some Entities in random spots
-    for (i in 0...1) {
+    for (i in 0...10) {
       var entity = new Entity();
       entity.name = 'Entity ${i + 1}';
-      entity.position.x = Math.random() * 1000;
-      entity.position.y = Math.random() * 1000;
+      var position = entity.components.get(Position);
+      if (position != null) {
+        position.x = Math.random() * 1000;
+        position.y = Math.random() * 1000;
+      }
       add_entity(entity);
     }
 

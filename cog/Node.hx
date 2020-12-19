@@ -5,15 +5,17 @@ class Node<Rest> {}
 
 class NodeBase {
   var name:String = 'NodeBase';
-
-  public var components:Components;
+  /**
+   * The `Components` object that owns this Node instance.
+   */
+  public var owner:Components;
 
   public function dispose() {
-    components = null;
+    owner = null;
   }
 
   public function toString() {
-    return '$name( $components )';
+    return '$name( $owner )';
   }
 }
 

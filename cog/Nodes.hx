@@ -4,8 +4,8 @@ import cog.Signal;
 
 @:structInit
 class NodeListeners {
-  var added:Listener<Component->Void>;
-  var removed:Listener<Component->Void>;
+  var added:Listener<IComponent->Void>;
+  var removed:Listener<IComponent->Void>;
 
   public function dispose() {
     added.dispose();
@@ -23,7 +23,7 @@ class Nodes<T:Node.NodeBase> {
   var filter:Components->Bool;
   var track_adds:Listener<Components->Void>;
   var track_removes:Listener<Components->Void>;
-  var components:Array<Int>;
+  var components_index:Array<Int>;
   var members:Array<T>;
   var listeners:Map<Components, NodeListeners>;
 
@@ -31,7 +31,7 @@ class Nodes<T:Node.NodeBase> {
     this.engine = engine;
     this.factory = factory;
     this.filter = filter;
-    components = [];
+    components_index = [];
     members = [];
     listeners = [];
 
@@ -43,19 +43,16 @@ class Nodes<T:Node.NodeBase> {
       if (filter(components)) add(components);
     }
 
-    track_adds = engine.components_added.add(components -> {
-      track(components);
-      if (filter(components)) add(components);
-    });
-    track_removes = engine.components_removed.add(components -> {
-      untrack(components);
-      remove(components);
-    });
+    // Listen for any new Components objects being added to the Engine, then start tracking their Component changes
+    track_adds = engine.components_added.add(components -> track(components));
+
+    // Listen for any Components objects getting removed from the Engine, then stop tracking their Component changes
+    track_removes = engine.components_removed.add(components -> untrack(components));
   }
 
   function add(components:Components) {
-    if (this.components.indexOf(components.id) == -1) {
-      this.components.push(components.id);
+    if (components_index.indexOf(components.id) == -1) {
+      components_index.push(components.id);
       var node = factory(components);
       members.push(node);
       added.dispatch(node);
@@ -63,29 +60,38 @@ class Nodes<T:Node.NodeBase> {
   }
 
   function remove(components:Components) {
-    var i = this.components.indexOf(components.id);
+    var i = components_index.indexOf(components.id);
     if (i > -1) {
       removed.dispatch(members[i]);
       members[i].dispose();
       members.splice(i, 1);
-      this.components.splice(i, 1);
+      components_index.splice(i, 1);
     }
   }
-
+  /**
+   * Adds a Listener to track Component changes in the Components object.
+   * When a Component is added or removed from the Components object, the listener will check if the Components object belongs in this Nodes list.
+   * @param components
+   */
   function track(components:Components) {
     if (listeners.exists(components)) return;
     listeners.set(components, {
       added: components.added.add(component -> if (filter(components)) add(components)),
       removed: components.added.add(component -> if (!filter(components)) remove(components))
     });
-  }
 
+    // Immediately check if the Components object should be added to this Node list
+    if (filter(components)) add(components);
+  }
+  /**
+   * Stops tracking the changes in a Components object, disposing of the associated Listener.
+   * @param components
+   */
   function untrack(components:Components) {
     var listener = listeners.get(components);
-    if (listener != null) {
-      listener.dispose();
-      remove(components);
-    }
+    if (listener != null) listener.dispose();
+    // Attempt to remove the Components object from this Nodes list
+    remove(components);
   }
 
   public function dispose() {
@@ -94,7 +100,7 @@ class Nodes<T:Node.NodeBase> {
     track_removes.dispose();
     track_removes = null;
     listeners.clear();
-    components.resize(0);
+    components_index.resize(0);
     for (member in members) member.dispose();
     members.resize(0);
   }

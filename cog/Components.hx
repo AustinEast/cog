@@ -1,6 +1,6 @@
 package cog;
 
-import cog.Component;
+import cog.IComponent;
 
 @:build(cog.Macros.build_components())
 class Components {
@@ -11,31 +11,31 @@ class Components {
   public final id:UInt = ids++;
 
   public var active:Bool = true;
-  public var added:Signal<Component> = new Signal<Component>();
-  public var removed:Signal<Component> = new Signal<Component>();
+  public var added:Signal<IComponent> = new Signal<IComponent>();
+  public var removed:Signal<IComponent> = new Signal<IComponent>();
 
-  var members:Map<ComponentType, Component> = [];
+  var members:Map<ComponentType, IComponent> = [];
 
   public function new() {}
 
-  public function add(component:Component, overwrite:Bool = false):Component {
-    if (overwrite) remove(component.type);
-    else if (members.exists(component.type)) {
-      trace('Component of type "${component.type}" already attached to Components #${id})');
+  public function add(component:IComponent, overwrite:Bool = false):IComponent {
+    if (overwrite) remove(component.component_type);
+    else if (members.exists(component.component_type)) {
+      trace('Component of type "${component.component_type}" already attached to Components #${id})');
       return component;
     }
 
-    members.set(component.type, component);
-    component.added(this);
+    members.set(component.component_type, component);
+    if (component.owner_added != null) component.owner_added(this);
     added.dispatch(component);
     return component;
   }
 
-  public function remove(type:ComponentType):Null<Component> {
+  public function remove(type:ComponentType):Null<IComponent> {
     var component = get(type);
     if (component != null) {
-      members.remove(component.type);
-      component.removed();
+      members.remove(component.component_type);
+      if (component.owner_removed != null) component.owner_removed();
       removed.dispatch(component);
       return component;
     }
@@ -49,11 +49,11 @@ class Components {
     return true;
   }
 
-  public inline function get<T:Component>(type:Class<T>):Null<T> return cast members.get((cast type : Class<Component>));
+  public inline function get<T:IComponent>(type:Class<T>):Null<T> return cast members.get((cast type : Class<IComponent>));
 
   public function dispose() {
     active = false;
-    if (members != null) for (member in members) member.dispose();
+    if (members != null) for (member in members) member.remove_owner();
     members = null;
   }
 

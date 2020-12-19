@@ -26,7 +26,7 @@ class System {
   }
 
   public function removed() {
-    engine = null;
+    if (engine != null) engine.remove_system(this);
     remove_nodes();
   }
 
