@@ -21,6 +21,7 @@ class Engine {
    * @param group
    */
   public function add_system(system:System, group:Int = 0) {
+    if (system.engine != null) system.removed();
     if (systems[group] == null) systems[group] = [];
     if (!systems[group].contains(system)) {
       systems[group].push(system);
@@ -35,7 +36,6 @@ class Engine {
   public function remove_system(system:System, group:Int = -1) {
     if (group < 0) for (s in systems) {
       if (s.remove(system)) {
-        @:privateAccess
         system.engine = null;
         system.removed();
       }
@@ -44,7 +44,6 @@ class Engine {
 
     if (systems[group] == null) return;
     if (systems[group].remove(system)) {
-      @:privateAccess
       system.engine = null;
       system.removed();
     }

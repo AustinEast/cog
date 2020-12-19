@@ -10,6 +10,7 @@ class System {
 
   public var fixed_framerate(default, set):Float = 60;
 
+  @:allow(cog.Engine)
   var engine:Engine;
 
   var fixed_accumulator:Float = 0;
