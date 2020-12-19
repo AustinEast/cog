@@ -12,11 +12,9 @@ class SignalBase<T:Function> {
   var tail:Listener<T>;
   var toAddHead:Listener<T>;
   var toAddTail:Listener<T>;
-  var dispatching:Bool;
+  var dispatching:Bool = false;
 
-  public function new() {
-    dispatching = false;
-  }
+  public function new() {}
 
   public function add(listener:T, once = false):Listener<T> {
     var listner = new Listener(this, listener, once);

@@ -10,19 +10,13 @@ class Components {
    */
   public final id:UInt = ids++;
 
-  public var active:Bool;
-  public var added:Signal<Component>;
-  public var removed:Signal<Component>;
+  public var active:Bool = true;
+  public var added:Signal<Component> = new Signal<Component>();
+  public var removed:Signal<Component> = new Signal<Component>();
 
-  var members:Map<ComponentType, Component>;
+  var members:Map<ComponentType, Component> = [];
 
-  public function new() {
-    id = ++ids;
-    active = true;
-    added = new Signal<Component>();
-    removed = new Signal<Component>();
-    members = [];
-  }
+  public function new() {}
 
   public function add(component:Component, overwrite:Bool = false):Component {
     if (overwrite) remove(component.type);
