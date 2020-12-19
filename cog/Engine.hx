@@ -7,6 +7,9 @@ class Engine {
   public var components_added:Signal<Components> = new Signal<Components>();
   public var components_removed:Signal<Components> = new Signal<Components>();
 
+  // TODO cache and reuse "Nodes" between systems
+  // var nodes_cache:Map<NodeType, Nodes<Dynamic>>;
+
   public function new() {}
 
   public function step(dt:Float, group:Int = 0) {
@@ -36,5 +39,16 @@ class Engine {
 
   public function remove_components(components:Components) {
     if (this.components.remove(components)) components_removed.dispatch(components);
+  }
+
+  public function dispose() {
+    for (c in components) remove_components(c);
+    components = null;
+
+    for (key => arr in systems) for (i in 0...arr.length) remove_system(arr[i], key);
+    systems = null;
+
+    components_added = null;
+    components_removed = null;
   }
 }
