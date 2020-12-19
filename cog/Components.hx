@@ -4,11 +4,11 @@ import cog.Component;
 
 @:build(cog.Macros.build_components())
 class Components {
-  static var ids:Int = 0;
+  static var ids:UInt = 0;
   /**
    * Unique id of the Components container.
    */
-  public var id(default, null):Int;
+  public final id:UInt = ids++;
 
   public var active:Bool;
   public var added:Signal<Component>;
