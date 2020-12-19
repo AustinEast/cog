@@ -51,11 +51,6 @@ class Components {
 
   public inline function get<T:Component>(type:Class<T>):Null<T> return cast members.get((cast type : Class<Component>));
 
-  public inline function send(event:String, ?data:Dynamic) for (component in members) component.handle(event, data);
-
-  @:allow(cog.Component.send)
-  inline function handle(event:String, ?data:Dynamic) send(event, data);
-
   public function dispose() {
     active = false;
     if (members != null) for (member in members) member.dispose();

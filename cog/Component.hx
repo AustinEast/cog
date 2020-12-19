@@ -14,15 +14,6 @@ class Component {
     components = null;
   }
 
-  inline function send(event:String, ?data:Dynamic) if (components != null) components.handle(event, data);
-  /**
-   * Override Me!
-   * @param event
-   * @param data
-   */
-  @:allow(cog.Components.send)
-  function handle(event:String, ?data:Dynamic) {}
-
   public function dispose() {
     if (components != null) components.remove(type);
   }
