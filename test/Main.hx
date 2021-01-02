@@ -3,6 +3,7 @@ import cog.Components;
 import cog.System;
 import cog.Engine;
 import cog.Node;
+import cog.Signal;
 
 // Creating Component classes is as simple as implementing the `IComponent` interface.
 // When the interface is implemented, the required Component fields are all added automatically.
@@ -46,6 +47,8 @@ class MovementSystem extends System {
   // and will create a `Node` object for each one
   @:nodes var nodes:Node<Position, Velocity>;
 
+  var nodes_added_listener:Listener<Node<Position, Velocity>->Void>;
+
   // This method is called when a System is added to the Cog Engine
   // Override this to apply any needed initialization logic to your Nodes
   override function added(engine:Engine) {
@@ -58,7 +61,7 @@ class MovementSystem extends System {
     }
 
     // Subscribe to the Node list's `added` event to set a random velocity to each Node as it gets added to the System
-    nodes.added.add(node -> {
+    nodes_added_listener = nodes.added.add(node -> {
       node.velocity.x = Math.random() * 200;
       node.velocity.y = Math.random() * 200;
     });
@@ -68,6 +71,9 @@ class MovementSystem extends System {
   // Override this to apply any needed disposal logic to your Nodes
   override function removed() {
     super.removed();
+
+    // Dispose of the `nodes.added` listener
+    nodes_added_listener.dispose();
   }
 
   // This method is called every time the Cog Engine is stepped forward by the Game Loop
