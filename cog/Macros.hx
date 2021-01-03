@@ -58,11 +58,10 @@ class Macros {
             }
             var fullNodeName = ct.pack.concat([ct.name]);
             // Make the expression to create the `Nodes` when the system is added
-            addNodesExpr.push(macro $i{fieldName} = new cog.Nodes(engine, components -> new $typePath(components),
-              (components) -> components.has_all($p{fullNodeName}.component_types)));
+            addNodesExpr.push(macro $i{fieldName} = engine.get_nodes($p{fullNodeName},
+              () -> new cog.Nodes(engine, components -> new $typePath(components), (components) -> components.has_all($p{fullNodeName}.component_types))));
             // Make the expressions to destroy the `Nodes` when the system is removed
             removeNodesExpr.push(macro {
-              if ($i{fieldName} != null) $i{fieldName}.dispose();
               $i{fieldName} = null;
             });
           default:

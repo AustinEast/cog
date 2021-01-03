@@ -1,5 +1,7 @@
 package cog;
 
+import cog.Node;
+
 class Engine {
   public var active:Bool = true;
   public var systems:Map<Int, Array<System>> = [];
@@ -7,8 +9,7 @@ class Engine {
   public var components_added:Signal<Components> = new Signal<Components>();
   public var components_removed:Signal<Components> = new Signal<Components>();
 
-  // TODO cache and reuse "Nodes" between systems
-  // var nodes_cache:Map<NodeType, Nodes<Dynamic>>;
+  var nodes_cache:Map<Node.NodeType, Nodes<Dynamic>> = [];
 
   public function new() {}
 
@@ -59,12 +60,20 @@ class Engine {
     if (this.components.remove(components)) components_removed.dispatch(components);
   }
 
+  public function get_nodes<T:NodeBase>(node_type:NodeType, factory:Void->Nodes<T>):Nodes<T> {
+    if (!nodes_cache.exists(node_type)) nodes_cache.set(node_type, factory());
+    return cast nodes_cache.get(node_type);
+  }
+
   public function dispose() {
     for (c in components) remove_components(c);
     components = null;
 
     for (key => arr in systems) for (i in 0...arr.length) remove_system(arr[i], key);
     systems = null;
+
+    for (n in nodes_cache) n.dispose();
+    nodes_cache = null;
 
     components_added = null;
     components_removed = null;

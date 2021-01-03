@@ -44,8 +44,10 @@ class System {
     else step(dt * time_scale);
   }
 
+  @:noCompletion
   function add_nodes() {}
 
+  @:noCompletion
   function remove_nodes() {}
 
   function set_fixed_framerate(v:Float) {

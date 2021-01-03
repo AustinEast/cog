@@ -13,7 +13,6 @@ class NodeListeners {
   }
 }
 
-@:generic
 class Nodes<T:Node.NodeBase> {
   public var added:Signal<T>;
   public var removed:Signal<T>;
