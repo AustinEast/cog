@@ -32,6 +32,7 @@ class System {
   }
 
   @:allow(cog.Engine)
+  @:noCompletion
   function try_step(dt:Float) {
     if (!active) return;
     if (fixed) {
