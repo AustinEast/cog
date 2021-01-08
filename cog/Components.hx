@@ -26,6 +26,8 @@ class Components {
     }
 
     members.set(component.component_type, component);
+    @:privateAccess
+    component.owner = this;
     if (component.owner_added != null) component.owner_added(this);
     added.dispatch(component);
     return component;
@@ -35,6 +37,8 @@ class Components {
     var component = get(type);
     if (component != null) {
       members.remove(component.component_type);
+      @:privateAccess
+      component.owner = null;
       if (component.owner_removed != null) component.owner_removed();
       removed.dispatch(component);
       return component;
