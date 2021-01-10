@@ -158,7 +158,7 @@ class Macros {
        * trace(myComponent.component_type == "MyComponent"); // also true
        * ```
        */
-      public var component_type(get, never):ComponentType;
+      public var component_type(get, never):cog.IComponent.ComponentType;
       /**
        * The `Components` object that currently owns this Component.
        */
@@ -178,7 +178,7 @@ class Macros {
         if (owner != null) owner.remove(component_type);
       }
 
-      inline function get_component_type():ComponentType return this;
+      inline function get_component_type():cog.IComponent.ComponentType return this;
     }).fields;
 
     return fields.concat(concat);
