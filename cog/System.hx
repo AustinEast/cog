@@ -2,7 +2,7 @@ package cog;
 
 @:autoBuild(cog.Macros.build_system())
 class System {
-  public var active:Bool = true;
+  public var active(default, set):Bool = true;
 
   public var time_scale:Float = 1;
 
@@ -18,14 +18,22 @@ class System {
   var fixed_dt:Float;
 
   public function new() {}
-
+  /**
+   * This method is called every time this System's Engine is stepped forward. Override this to apply any logic that should run every frame.
+   * @param dt
+   */
   public function step(dt:Float) {}
-
+  /**
+   * This method is called when a System is added to the Cog Engine. Override this to apply any needed initialization logic for the System.
+   * @param engine
+   */
   public function added(engine:Engine) {
     this.engine = engine;
     add_nodes();
   }
-
+  /**
+   * This method is called when a System is removed from the Cog Engine. Override this to apply any needed disposal logic for the System.
+   */
   public function removed() {
     if (engine != null) engine.remove_system(this);
     remove_nodes();
@@ -55,5 +63,9 @@ class System {
     fixed_framerate = Math.max(v, 0);
     fixed_dt = 1 / fixed_framerate;
     return fixed_framerate;
+  }
+
+  function set_active(v:Bool) {
+    return active = v;
   }
 }

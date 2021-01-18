@@ -39,6 +39,8 @@ class Macros {
     var fields = Context.getBuildFields();
     var addNodesExpr:Array<Expr> = [];
     var removeNodesExpr:Array<Expr> = [];
+    var newFields:Array<Field> = [];
+    var pos = Context.currentPos();
 
     // Loop through each field
     for (field in fields) {
@@ -56,12 +58,59 @@ class Macros {
               name: ct.name,
               pack: ct.pack
             }
+
+            // Add the [field name]_added_listener and [field name]_removed_listener variable
+            newFields.push({
+              access: [APublic],
+              name: '${fieldName}_added_listener',
+              pos: pos,
+              kind: FVar(macro:cog.Signal.Listener < $t -> Void >)
+            });
+
+            newFields.push({
+              access: [APublic],
+              name: '${fieldName}_removed_listener',
+              pos: pos,
+              kind: FVar(macro:cog.Signal.Listener < $t -> Void >)
+            });
+
+            // Add the [field name]_added and [field name]_removed methods
+            newFields.push({
+              access: [APublic],
+              name: '${fieldName}_added',
+              pos: pos,
+              kind: FVar(macro:Null < $t -> Void >)
+            });
+
+            newFields.push({
+              access: [APublic],
+              name: '${fieldName}_removed',
+              pos: pos,
+              kind: FVar(macro:Null < $t -> Void >)
+            });
+
             var fullNodeName = ct.pack.concat([ct.name]);
             // Make the expression to create the `Nodes` when the system is added
-            addNodesExpr.push(macro $i{fieldName} = engine.get_nodes($p{fullNodeName},
-              () -> new cog.Nodes(engine, components -> new $typePath(components), (components) -> components.has_all($p{fullNodeName}.component_types))));
+            addNodesExpr.push(macro {
+              // Get the Nodes from the Engine's Nodes cache
+              $i{fieldName} = engine.get_nodes($p{fullNodeName},
+                () -> new cog.Nodes(engine, components -> new $typePath(components), (components) -> components.has_all($p{fullNodeName}.component_types)));
+
+              // Add all existing nodes
+              if ($i{'${fieldName}_added'} != null) for (node in $i{fieldName}) $i{'${fieldName}_added'}(node);
+
+              // Add the nodes_added and nodes_removed listeners
+              $i{'${fieldName}_added_listener'} = $i{fieldName}.added.add((node) -> if ($i{'${fieldName}_added'} != null) $i{'${fieldName}_added'}(node));
+              $i{'${fieldName}_removed_listener'} = $i{fieldName}.removed.add((node) -> if ($i{'${fieldName}_removed'} != null)
+                $i{'${fieldName}_removed'}(node));
+            });
             // Make the expressions to destroy the `Nodes` when the system is removed
             removeNodesExpr.push(macro {
+              if ($i{'${fieldName}_added_listener'} != null) $i{'${fieldName}_added_listener'}.dispose();
+              if ($i{'${fieldName}_removed_listener'} != null) $i{'${fieldName}_removed_listener'}.dispose();
+              if ($i{fieldName} != null && $i{'${fieldName}_removed'} != null) {
+                for (node in $i{fieldName}) $i{'${fieldName}_removed'}(node);
+              }
               $i{fieldName} = null;
             });
           default:
@@ -70,10 +119,8 @@ class Macros {
       }
     }
 
-    var pos = Context.currentPos();
-
     // add expressions to create nodelists
-    if (addNodesExpr.length > 0) fields.push({
+    if (addNodesExpr.length > 0) newFields.push({
       access: [AOverride, AInline],
       name: 'add_nodes',
       pos: pos,
@@ -85,7 +132,7 @@ class Macros {
     });
 
     // add expressions to remove nodelists
-    if (removeNodesExpr.length > 0) fields.push({
+    if (removeNodesExpr.length > 0) newFields.push({
       access: [AOverride, AInline],
       name: 'remove_nodes',
       pos: pos,
@@ -96,7 +143,7 @@ class Macros {
       })
     });
 
-    return fields;
+    return fields.concat(newFields);
   }
 
   static function build_node():ComplexType {

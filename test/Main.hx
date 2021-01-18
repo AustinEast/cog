@@ -3,7 +3,6 @@ import cog.Components;
 import cog.System;
 import cog.Engine;
 import cog.Node;
-import cog.Signal;
 
 // Creating Component classes is as simple as implementing the `IComponent` interface.
 // When the interface is implemented, the required Component fields are all added automatically.
@@ -45,41 +44,26 @@ class MovementSystem extends System {
   // Using the `@:nodes` metadata, create a collection of Nodes.
   // The Nodes class automatically tracks any `Components` object that has the Position and Velocity components,
   // and will create a `Node` object for each one
-  @:nodes var nodes:Node<Position, Velocity>;
+  @:nodes var movers:Node<Position, Velocity>;
 
-  var nodes_added_listener:Listener<Node<Position, Velocity>->Void>;
+  public function new() {
+    super();
 
-  // This method is called when a System is added to the Cog Engine
-  // Override this to apply any needed initialization logic to your Nodes
-  override function added(engine:Engine) {
-    super.added(engine);
-
-    // Set a random velocity on each Node that already exists in the System
-    for (node in nodes) {
+    // Two callback methods are automatically generated for each Node variable with the `@:nodes` metadata in this System
+    // This callback is invoked every time a new Node is added to the `movers` Node list.
+    movers_added = (node) -> {
+      // Set a random velocity to each Node as it gets added to the System
       node.velocity.x = Math.random() * 200;
       node.velocity.y = Math.random() * 200;
     }
-
-    // Subscribe to the Node list's `added` event to set a random velocity to each Node as it gets added to the System
-    nodes_added_listener = nodes.added.add(node -> {
-      node.velocity.x = Math.random() * 200;
-      node.velocity.y = Math.random() * 200;
-    });
-  }
-
-  // This method is called when a System is removed from the Cog Engine
-  // Override this to apply any needed disposal logic to your Nodes
-  override function removed() {
-    super.removed();
-
-    // Dispose of the `nodes.added` listener
-    nodes_added_listener.dispose();
+    // This callback is invoked every time a Node is removed from the `movers` Node list.
+    movers_removed = (node) -> {}
   }
 
   // This method is called every time the Cog Engine is stepped forward by the Game Loop
   override public function step(dt:Float) {
     super.step(dt);
-    for (node in nodes) {
+    for (node in movers) {
       // Increment each Node's Position by it's Velocity
       // Each Node holds reference to the `Components` object, along with a reference to each Component defined by the Nodes list
       node.position.x += node.velocity.x * dt;
