@@ -1,8 +1,6 @@
 <p align="center">
   <img src="https://raw.githubusercontent.com/AustinEast/cog/master/assets/logo.png">
 </p>
-
-# cog
 A Macro powered B.Y.O.E. (Bring Your Own Entity!) ECS Framework written in Haxe.
 
 [![Build Status](https://travis-ci.org/AustinEast/cog.svg?branch=master)](https://travis-ci.org/AustinEast/cog)
