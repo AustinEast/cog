@@ -1,0 +1,3 @@
+[submodule "austineast.github.io.base"]
+	path = austineast.github.io.base
+	url = https://github.com/AustinEast/austineast.github.io.base.git

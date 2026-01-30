@@ -4,14 +4,47 @@
 <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <!-- Adds <include> tag -->
+    <script src="https://unpkg.com/htmlincludejs"></script>
     <title>{{ page.title | default: site.title | default: site.github.repository_name }}</title>
 
     <style>
+        nav {
+            text-align: center;
+        }
+
         body {
             max-width: 980px;
             margin: 0 auto;
             padding: 24px;
             font-family: system-ui, -apple-system, Segoe UI, Roboto, sans-serif;
+            background-color: #474747;
+            color: white;
+        }
+
+        a {
+            transition: all 0.2s;
+            text-decoration: underline;
+        }
+
+        a:link {
+            color: unset;
+        }
+
+        /* visited link */
+        a:visited {
+            color: unset;
+        }
+
+        /* mouse over link */
+        a:hover {
+            color: #999;
+            text-decoration: underline;
+        }
+
+        /* selected link */
+        a:active {
+            color: #999;
         }
 
         header.top {
@@ -24,31 +57,28 @@
             margin-right: 12px;
         }
 
-        /* Make images behave nicely in the README */
         main img {
             max-width: 100%;
             height: auto;
         }
 
-        /* Give code blocks a little breathing room */
         pre {
             padding: 12px;
             overflow: auto;
+            background-color: #3a3735;
+            border-radius: 9px;
         }
     </style>
 </head>
 
 <body>
+    <include src="austineast.github.io.base/elements/nav.html"></include>
     <header class="top">
         <h1 style="margin: 0 0 6px;">{{ site.title | default: site.github.repository_name }}</h1>
-        <p style="margin: 0 0 12px; opacity: 0.75;">
-            Your custom HTML goes here (hero, buttons, gif strip, whatever).
-        </p>
 
         <div class="links">
             <a href="{{ site.github.repository_url }}">GitHub</a>
             <a href="{{ site.github.issues_url }}">Issues</a>
-            <a href="{{ site.github.wiki_url }}">Wiki</a>
         </div>
     </header>
 
