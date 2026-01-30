@@ -1,0 +1,60 @@
+<!doctype html>
+<html lang="en">
+
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>{{ page.title | default: site.title | default: site.github.repository_name }}</title>
+
+    <style>
+        body {
+            max-width: 980px;
+            margin: 0 auto;
+            padding: 24px;
+            font-family: system-ui, -apple-system, Segoe UI, Roboto, sans-serif;
+        }
+
+        header.top {
+            padding: 16px 0 24px;
+            border-bottom: 1px solid #e5e5e5;
+            margin-bottom: 24px;
+        }
+
+        .links a {
+            margin-right: 12px;
+        }
+
+        /* Make images behave nicely in the README */
+        main img {
+            max-width: 100%;
+            height: auto;
+        }
+
+        /* Give code blocks a little breathing room */
+        pre {
+            padding: 12px;
+            overflow: auto;
+        }
+    </style>
+</head>
+
+<body>
+    <header class="top">
+        <h1 style="margin: 0 0 6px;">{{ site.title | default: site.github.repository_name }}</h1>
+        <p style="margin: 0 0 12px; opacity: 0.75;">
+            Your custom HTML goes here (hero, buttons, gif strip, whatever).
+        </p>
+
+        <div class="links">
+            <a href="{{ site.github.repository_url }}">GitHub</a>
+            <a href="{{ site.github.issues_url }}">Issues</a>
+            <a href="{{ site.github.wiki_url }}">Wiki</a>
+        </div>
+    </header>
+
+    <main>
+        {{ content }}
+    </main>
+</body>
+
+</html>
